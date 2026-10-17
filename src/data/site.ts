@@ -36,10 +36,10 @@ export const site = {
 
 export const fullAddress = `${site.address.street}, ${site.address.district}, ${site.address.city}, ${site.address.province}`;
 
-// Lokasi resmi "PT. Masa Mitra Pratama" di Google Maps (embed dari pemilik).
+// Lokasi resmi "PT. MANGUN SERTIFIKASI SOLUSINDO" di Google Maps (embed dari pemilik).
 export const maps = {
   embed:
-    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3982.1756671987105!2d98.6561627!3d3.546929!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30312f8cfb1b1c4b%3A0x59c7036fbb89a2a6!2sPT.%20Masa%20Mitra%20Pratama!5e0!3m2!1sid!2sid!4v1792229535355!5m2!1sid!2sid',
+    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3982.175681430732!2d98.6535877749729!3d3.5469256964273015!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30312fb612166a3b%3A0x4960c71efadfc7fd!2sPT.%20MANGUN%20SERTIFIKASI%20SOLUSINDO!5e0!3m2!1sid!2sid!4v1792242857035!5m2!1sid!2sid',
 };
 
 // Template pesan WhatsApp otomatis (dipakai di seluruh situs).
