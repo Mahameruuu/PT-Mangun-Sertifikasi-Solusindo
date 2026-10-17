@@ -1,0 +1,53 @@
+---
+interface Props {
+  table: { title?: string; columns: string[]; rows: string[][] };
+}
+const { table } = Astro.props;
+const multi = table.columns.length > 2;
+---
+<figure class="spec">
+  {table.title && <figcaption class="spec__title">{table.title}</figcaption>}
+  <div class="spec__scroll" tabindex="0" role="region" aria-label={table.title ?? 'Tabel spesifikasi'}>
+    <table class:list={['spec__table', { 'spec__table--multi': multi }]}>
+      {multi && (
+        <thead>
+          <tr>{table.columns.map((c) => <th scope="col">{c}</th>)}</tr>
+        </thead>
+      )}
+      <tbody>
+        {table.rows.map(([label, ...values]) => (
+          <tr>
+            <th scope="row">{label}</th>
+            {values.map((v) => <td>{v}</td>)}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</figure>
+
+<style>
+  .spec { margin: 0 0 2rem; }
+  .spec__title { font-weight: 700; color: var(--navy-900); margin-bottom: 0.75rem; font-size: var(--fs-lg); }
+  .spec__scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    -webkit-overflow-scrolling: touch;
+  }
+  .spec__table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  .spec__table--multi { min-width: 560px; }
+  th, td { padding: 0.75rem 1rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+  tbody tr:last-child > * { border-bottom: 0; }
+  tbody th { font-weight: 600; color: var(--navy-900); width: 38%; background: var(--bg-soft); }
+  .spec__table--multi tbody th { width: auto; min-width: 160px; }
+  thead th { background: var(--navy-900); color: #fff; font-weight: 700; font-size: 0.875rem; }
+  @media (max-width: 639px) {
+    .spec__table:not(.spec__table--multi) tr { display: block; }
+    .spec__table:not(.spec__table--multi) th,
+    .spec__table:not(.spec__table--multi) td { display: block; width: auto; border-bottom: 0; }
+    .spec__table:not(.spec__table--multi) th { padding-bottom: 0.25rem; }
+    .spec__table:not(.spec__table--multi) td { padding-top: 0.25rem; border-bottom: 1px solid var(--border); }
+    .spec__table:not(.spec__table--multi) tbody tr:last-child td { border-bottom: 0; }
+  }
+</style>

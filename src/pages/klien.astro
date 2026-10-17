@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import ClientGrid from '../components/ClientGrid.astro';
+import CTASection from '../components/CTASection.astro';
+import { clients, clientSectors } from '../data/clients';
+---
+<BaseLayout
+  title="Klien"
+  description="Daftar institusi perbankan, perusahaan, dan lembaga yang telah menggunakan produk dan layanan PT. Mangun Sertifikasi Solusindo."
+>
+  <PageHeader
+    title="Klien Kami"
+    intro="Institusi perbankan, perusahaan, dan lembaga yang telah menggunakan produk serta layanan kami."
+    crumbs={[{ href: '/klien/', label: 'Klien' }]}
+  >
+    <dl class="summary">
+      <div><dt>Total klien</dt><dd>{clients.length}</dd></div>
+      {clientSectors.map((s) => (
+        <div><dt>{s.name}</dt><dd>{clients.filter((c) => c.sector === s.id).length}</dd></div>
+      ))}
+    </dl>
+  </PageHeader>
+
+  {clientSectors.map((s, i) => {
+    const items = clients.filter((c) => c.sector === s.id);
+    return (
+      <section class:list={['section', { 'section--soft': i % 2 === 1 }]} aria-labelledby={`sektor-${s.id}`}>
+        <div class="container">
+          <div class="sector-head" data-reveal>
+            <h2 id={`sektor-${s.id}`}>{s.name}</h2>
+          </div>
+          <ClientGrid items={items} />
+        </div>
+      </section>
+    );
+  })}
+
+  <CTASection />
+</BaseLayout>
+
+<style>
+  .summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.5rem;
+    margin: 2rem 0 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgb(255 255 255 / 0.12);
+  }
+  .summary dt { font-size: var(--fs-sm); color: #9fb0ca; }
+  .summary dd { margin: 0; font-size: 1.75rem; font-weight: 800; color: #fff; }
+
+  .sector-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 1rem; margin-bottom: 1.5rem; }
+  .sector-head h2 { margin: 0; font-size: var(--fs-2xl); }
+</style>

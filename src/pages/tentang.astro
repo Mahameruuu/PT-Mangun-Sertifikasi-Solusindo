@@ -1,0 +1,280 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Icon from '../components/Icon.astro';
+import ClientGrid from '../components/ClientGrid.astro';
+import CTASection from '../components/CTASection.astro';
+import logoMark from '../assets/img/logo-mss.png';
+import { site, fullAddress } from '../data/site';
+import { categories } from '../data/categories';
+import { clients } from '../data/clients';
+
+const productCount = (await getCollection('produk')).length;
+const cities = ['Medan', ...site.servicePoints.map((s) => s.city)];
+
+const facts = [
+  { icon: 'calendar', label: 'Berdiri', value: `${site.since}, di Kota Medan` },
+  { icon: 'building', label: 'Kantor pusat', value: `${site.address.city}, ${site.address.province}` },
+  { icon: 'map-pinned', label: 'Jaringan layanan', value: cities.join(', ') },
+  { icon: 'grid', label: 'Katalog', value: `${categories.length} kategori, ${productCount} produk` },
+  { icon: 'handshake', label: 'Klien', value: `${clients.length} institusi perbankan & industri` },
+  { icon: 'headset', label: 'Bidang layanan', value: 'IT & Perbankan, Konstruksi & Teknik' },
+] as const;
+
+const missions = [
+  'Memberikan layanan jasa IT di bidang mesin hitung uang, mesin sortir uang, sistem keamanan, sistem alarm, CCTV, serta produk IT perbankan lainnya.',
+  'Memberikan layanan jasa teknisi di bidang sipil, mekanikal, dan elektrikal dengan tanggung jawab dan kualitas terbaik.',
+  'Menjadi perusahaan yang mampu bersaing secara nasional.',
+];
+---
+<BaseLayout
+  title="Tentang Kami"
+  description={`${site.name} adalah perusahaan pengadaan barang dan jasa di bidang IT perbankan, perkantoran, dan industri yang berdiri di Medan sejak ${site.since}.`}
+>
+  <PageHeader
+    title="Tentang Kami"
+    intro={`Mitra pengadaan dan layanan peralatan perbankan, perkantoran, serta industri sejak ${site.since}.`}
+    crumbs={[{ href: '/tentang/', label: 'Tentang Kami' }]}
+  />
+
+  <!-- Profil -->
+  <section class="section">
+    <div class="container profile">
+      <div class="profile__text" data-reveal>
+        <span class="eyebrow">Profil Perusahaan</span>
+        <h2>Berawal dari Medan, {site.since}</h2>
+        <p class="lead">
+          {site.name} bergerak di bidang pengadaan barang dan jasa untuk kebutuhan perbankan, perkantoran,
+          dan industri. Kami memulai usaha di Kota Medan pada tahun {site.since} dan terus berkembang hingga
+          melayani pelanggan di berbagai kota besar di Indonesia.
+        </p>
+        <p>
+          Berawal dari pengadaan mesin hitung uang merek Glory asal Jepang dan printer merek Compuprint, lini
+          usaha kami kini mencakup mesin hitung dan sortir uang, berbagai jenis printer, mesin antrian, encoder,
+          mesin absensi sidik jari, sistem kontrol akses, sistem parkir otomatis, dan lainnya.
+        </p>
+        <p>
+          Kami juga menyediakan layanan purna jual untuk hampir seluruh mesin hitung uang yang digunakan
+          perbankan dan perusahaan pengelola uang tunai (CIT) di Indonesia, termasuk pengembangan perangkat
+          lunak pendukung bagi perbankan nasional.
+        </p>
+        <blockquote class="commitment">
+          <Icon name="headset" />
+          <p>
+            Kami memahami bahwa pelayanan yang cepat sangat dibutuhkan untuk menjaga kepuasan dan citra
+            perusahaan klien. Karena itu, kami terus berbenah untuk melayani dengan sepenuh hati serta memberikan
+            respons yang ramah, cepat, dan berkualitas.
+          </p>
+        </blockquote>
+      </div>
+
+      <aside class="glance" aria-labelledby="glance-title" data-reveal="right">
+        <div class="glance__head">
+          <Image src={logoMark} alt="" height={44} densities={[1, 2]} />
+          <div>
+            <p class="glance__eyebrow" id="glance-title">Sekilas Perusahaan</p>
+            <p class="glance__name">{site.name}</p>
+          </div>
+        </div>
+        <dl class="glance__list">
+          {facts.map((f) => (
+            <div class="glance__item">
+              <span class="glance__icon"><Icon name={f.icon} /></span>
+              <div>
+                <dt>{f.label}</dt>
+                <dd>{f.value}</dd>
+              </div>
+            </div>
+          ))}
+        </dl>
+        <a class="btn btn--dark glance__cta" href="/produk/">Jelajahi Katalog Produk <Icon name="arrow" /></a>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Visi & Misi -->
+  <section class="section section--soft" aria-labelledby="visi-misi">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">Visi & Misi</span>
+        <h2 id="visi-misi">Arah dan komitmen kami</h2>
+      </div>
+      <div class="vm">
+        <div class="vision" data-reveal="left">
+          <span class="vision__icon"><Icon name="target" /></span>
+          <p class="vision__label">Visi</p>
+          <p class="vision__text">
+            Menjadi salah satu perusahaan jasa di bidang IT, sertifikasi, konstruksi sipil, mekanikal, dan
+            elektrikal yang bertanggung jawab dan berkualitas.
+          </p>
+        </div>
+        <div class="missions">
+          <p class="missions__label"><Icon name="flag" /> Misi</p>
+          <ol>
+            {missions.map((m, i) => (
+              <li data-reveal style={`--i:${i}`}>
+                <span class="missions__num">{String(i + 1).padStart(2, '0')}</span>
+                <p>{m}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Jaringan layanan -->
+  <section class="section" aria-labelledby="jaringan">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">Jaringan Layanan</span>
+        <h2 id="jaringan">Kantor pusat dan titik layanan</h2>
+        <p>Kantor pusat di Medan didukung titik layanan di Batam dan Pekanbaru untuk penanganan yang lebih cepat.</p>
+      </div>
+      <div class="locations">
+        <article class="loc loc--hq" data-reveal>
+          <span class="loc__badge">Kantor Pusat</span>
+          <h3>Medan</h3>
+          <ul>
+            <li><Icon name="pin" /><span>{fullAddress}</span></li>
+            <li><Icon name="phone" /><a href={`tel:${site.phone.tel}`}>{site.phone.display}</a></li>
+            <li><Icon name="smartphone" /><span>{site.mobiles.map((m, i) => <>{i > 0 && ' · '}<a href={`tel:${m.tel}`}>{m.display}</a></>)}</span></li>
+          </ul>
+        </article>
+        {site.servicePoints.map((s, i) => (
+          <article class="loc" data-reveal style={`--i:${i + 1}`}>
+            <span class="loc__badge">Titik Layanan</span>
+            <h3>{s.city}</h3>
+            <ul>
+              <li><Icon name="user" /><span>Kontak: {s.contact}</span></li>
+              <li><Icon name="phone" /><a href={`tel:${s.tel}`}>{s.display}</a></li>
+            </ul>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Klien -->
+  <section class="section section--soft" aria-labelledby="klien-title">
+    <div class="container">
+      <div class="section-head section-head--row" data-reveal>
+        <div>
+          <span class="eyebrow">Klien</span>
+          <h2 id="klien-title">Dipercaya oleh perbankan dan industri</h2>
+        </div>
+        <a class="btn btn--ghost" href="/klien/">Lihat Daftar Klien <Icon name="arrow" /></a>
+      </div>
+      <ClientGrid items={clients.slice(0, 12)} names={false} />
+    </div>
+  </section>
+
+  <CTASection />
+</BaseLayout>
+
+<style>
+  /* ---------- Profil ---------- */
+  .profile { display: grid; gap: 2.5rem; align-items: start; }
+  @media (min-width: 900px) { .profile { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 4rem; } }
+  .profile__text p:not(.lead) { color: #33415a; line-height: 1.75; }
+  .profile__text .lead { color: var(--text); line-height: 1.7; }
+  .commitment {
+    display: flex;
+    gap: 0.9rem;
+    margin: 1.75rem 0 0;
+    padding: 1.1rem 1.25rem;
+    border-left: 4px solid var(--amber-400);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: #fff8e8;
+  }
+  .commitment :global(svg) { flex: none; width: 24px; height: 24px; margin-top: 2px; color: var(--amber-500); }
+  .commitment p { margin: 0; color: #4a3a12; font-style: italic; line-height: 1.7; }
+
+  .glance {
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #fff;
+    box-shadow: var(--shadow);
+  }
+  @media (min-width: 900px) { .glance { position: sticky; top: calc(var(--header-h) + 1.5rem); } }
+  .glance__head { display: flex; align-items: center; gap: 0.85rem; padding-bottom: 1.1rem; margin-bottom: 1.1rem; border-bottom: 1px solid var(--border); }
+  .glance__head :global(img) { height: 44px; width: auto; flex: none; }
+  .glance__eyebrow { margin: 0; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue-500); }
+  .glance__name { margin: 0; font-weight: 800; color: var(--navy-900); font-size: 1.05rem; }
+  .glance__list { display: grid; gap: 1rem; margin: 0 0 1.5rem; }
+  .glance__item { display: flex; gap: 0.85rem; align-items: flex-start; }
+  .glance__icon { display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: 10px; background: #e3ecfb; color: var(--blue-500); }
+  .glance__icon :global(svg) { width: 19px; height: 19px; }
+  .glance__item dt { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
+  .glance__item dd { margin: 0.1rem 0 0; font-weight: 600; color: var(--text); line-height: 1.45; }
+  .glance__cta { width: 100%; }
+
+  /* ---------- Visi & Misi ---------- */
+  .vm { display: grid; gap: 1.25rem; }
+  @media (min-width: 900px) { .vm { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 1.5rem; align-items: stretch; } }
+  .vision {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem);
+    border-radius: var(--radius);
+    background: radial-gradient(circle at 100% 0%, rgb(47 111 208 / 0.45), transparent 55%), var(--navy-900);
+    color: #fff;
+  }
+  .vision__icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: rgb(245 181 46 / 0.15); color: var(--amber-400); }
+  .vision__icon :global(svg) { width: 26px; height: 26px; }
+  .vision__label { margin: 1.25rem 0 0.5rem; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber-400); }
+  .vision__text { margin: 0; font-size: var(--fs-xl); font-weight: 600; line-height: 1.5; }
+
+  .missions__label { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.85rem; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue-500); }
+  .missions__label :global(svg) { width: 18px; height: 18px; }
+  .missions ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.85rem; }
+  .missions li {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #fff;
+  }
+  .missions__num { flex: none; font-size: 1.35rem; font-weight: 800; line-height: 1.2; color: var(--blue-500); }
+  .missions li p { margin: 0; line-height: 1.65; color: #33415a; }
+
+  /* ---------- Jaringan layanan ---------- */
+  .locations { display: grid; gap: 1rem; }
+  @media (min-width: 640px) { .locations { grid-template-columns: repeat(2, 1fr); } .loc--hq { grid-column: 1 / -1; } }
+  @media (min-width: 900px) { .locations { grid-template-columns: 1.4fr 1fr 1fr; gap: 1.25rem; } .loc--hq { grid-column: auto; } }
+  .loc {
+    padding: 1.4rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #fff;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .loc:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  .loc--hq { border-color: var(--navy-900); border-width: 1.5px; }
+  .loc__badge {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    background: #e3ecfb;
+    color: var(--blue-500);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .loc--hq .loc__badge { background: var(--navy-900); color: var(--amber-400); }
+  .loc h3 { margin: 0.75rem 0 0.9rem; font-size: 1.3rem; }
+  .loc ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.65rem; }
+  .loc li { display: flex; gap: 0.7rem; align-items: flex-start; line-height: 1.5; color: #33415a; }
+  .loc li :global(svg) { flex: none; width: 18px; height: 18px; margin-top: 0.15em; color: var(--blue-500); }
+  .loc a { font-weight: 600; text-decoration: none; white-space: nowrap; }
+
+  /* ---------- Klien ---------- */
+  .section-head--row { max-width: none; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1rem; }
+  .section-head--row h2 { margin: 0; }
+</style>

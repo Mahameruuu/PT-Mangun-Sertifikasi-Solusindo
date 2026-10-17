@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import CategoryNav from '../../../components/CategoryNav.astro';
+import ProductCard from '../../../components/ProductCard.astro';
+import CTASection from '../../../components/CTASection.astro';
+import { categories } from '../../../data/categories';
+import { waMessages } from '../../../data/site';
+
+export function getStaticPaths() {
+  return categories.map((c) => ({ params: { kategori: c.slug }, props: { category: c } }));
+}
+
+const { category } = Astro.props;
+const products = (await getCollection('produk', (p) => p.data.category === category.slug)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+<BaseLayout title={category.name} description={category.intro}>
+  <PageHeader
+    title={category.name}
+    intro={category.intro}
+    crumbs={[{ href: '/produk/', label: 'Produk' }, { href: `/produk/${category.slug}/`, label: category.name }]}
+  />
+
+  <div class="container catalog">
+    <CategoryNav active={category.slug} />
+    <div>
+      <p class="catalog__meta">Menampilkan {products.length} produk</p>
+      <div class="catalog__grid">
+        {products.map((p) => <ProductCard product={p} compact />)}
+      </div>
+    </div>
+  </div>
+
+  <CTASection message={waMessages.category(category.name)} />
+</BaseLayout>

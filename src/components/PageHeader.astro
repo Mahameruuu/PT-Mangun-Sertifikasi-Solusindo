@@ -1,0 +1,55 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  title: string;
+  intro?: string;
+  crumbs?: { href: string; label: string }[];
+}
+const { title, intro, crumbs = [] } = Astro.props;
+---
+<section class="page-header">
+  <div class="container">
+    {crumbs.length > 0 && (
+      <nav aria-label="Breadcrumb">
+        <ol class="crumbs">
+          <li><a href="/">Beranda</a></li>
+          {crumbs.map((c) => (
+            <li><Icon name="chevron" /><a href={c.href}>{c.label}</a></li>
+          ))}
+        </ol>
+      </nav>
+    )}
+    <h1>{title}</h1>
+    {intro && <p class="page-header__intro">{intro}</p>}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .page-header {
+    background:
+      radial-gradient(circle at 85% 0%, rgb(47 111 208 / 0.35), transparent 50%),
+      var(--navy-900);
+    color: #c9d5e8;
+    padding-block: 2.5rem 3rem;
+  }
+  @media (min-width: 768px) { .page-header { padding-block: 3.5rem 4rem; } }
+  h1 { color: #fff; font-size: var(--fs-3xl); max-width: 22ch; margin-bottom: 0.4em; }
+  .page-header__intro { font-size: var(--fs-lg); max-width: 62ch; margin: 0; }
+  .crumbs {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0;
+    margin: 0 0 1.25rem;
+    font-size: var(--fs-sm);
+  }
+  .crumbs li { display: flex; align-items: center; gap: 0.35rem; }
+  .crumbs a { color: #aebbd0; text-decoration: none; }
+  .crumbs a:hover { color: #fff; }
+  .crumbs li:last-child a { color: #fff; }
+  .crumbs :global(svg) { width: 14px; height: 14px; opacity: 0.6; }
+</style>

@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Halaman tidak ditemukan" description="Halaman yang Anda cari tidak ditemukan.">
+  <section class="section">
+    <div class="container notfound">
+      <span class="eyebrow">404</span>
+      <h1>Halaman tidak ditemukan</h1>
+      <p class="lead">Halaman yang Anda cari mungkin sudah dipindahkan. Coba mulai dari salah satu halaman berikut.</p>
+      <div class="notfound__links">
+        <a class="btn btn--dark" href="/">Beranda</a>
+        <a class="btn btn--ghost" href="/produk/">Produk</a>
+        <a class="btn btn--ghost" href="/kontak/">Kontak</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound { min-height: 50vh; display: flex; flex-direction: column; justify-content: center; }
+  .notfound__links { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+</style>

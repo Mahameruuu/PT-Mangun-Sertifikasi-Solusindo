@@ -1,0 +1,142 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Icon from '../components/Icon.astro';
+import CTASection from '../components/CTASection.astro';
+import { services } from '../data/services';
+import { waLink, waMessages } from '../data/site';
+
+const projects = (await getCollection('proyek')).sort((a, b) => a.data.order - b.data.order);
+---
+<BaseLayout
+  title="Layanan"
+  description="Layanan IT & perbankan (mesin hitung & sortir uang, mesin antrian, encoder, CCTV, kontrol akses) serta konstruksi & teknik (sistem parkir, sipil, mekanikal, elektrikal, pabrikasi)."
+>
+  <PageHeader
+    title="Layanan Kami"
+    intro="Selain pengadaan produk, kami menyediakan instalasi, perawatan, dan pekerjaan teknik di lokasi pelanggan, mulai dari ruang kas bank hingga lini produksi industri."
+    crumbs={[{ href: '/layanan/', label: 'Layanan' }]}
+  />
+
+  {services.map((s, i) => {
+    const related = projects.filter((p) => (s.projects as readonly string[]).includes(p.data.category)).slice(0, 4);
+    return (
+      <section class:list={['section', { 'section--soft': i % 2 === 1 }]} id={s.id}>
+        <div class="container">
+          <div class="service">
+            <div class="service__intro" data-reveal>
+              <span class="service__icon"><Icon name={s.icon} /></span>
+              <h2>{s.title}</h2>
+              <p class="lead">{s.intro}</p>
+              <a class="btn btn--wa" href={waLink(waMessages.service(s.title))} target="_blank" rel="noopener">
+                <Icon name="whatsapp" /> Konsultasikan Kebutuhan Anda
+              </a>
+            </div>
+            <div class="service__list" data-reveal style="--i:1">
+            <ul class="service__items">
+              {s.items.map((item) => (
+                <li>
+                  {'href' in item ? (
+                    <a href={item.href}><Icon name="check" /><span>{item.name}</span><Icon name="chevron" /></a>
+                  ) : (
+                    <span class="service__item"><Icon name="check" /><span>{item.name}</span></span>
+                  )}
+                </li>
+              ))}
+            </ul>
+            </div>
+          </div>
+
+          {related.length > 0 && (
+            <div class="service__projects">
+              <div class="service__projects-head">
+                <h3>Dokumentasi proyek terkait</h3>
+                <a href="/proyek/">Lihat portofolio lengkap <Icon name="arrow" /></a>
+              </div>
+              <div class="service__gallery" style={`--n:${related.length}; --ar:${related.length <= 2 ? '16 / 9' : '4 / 3'}`}>
+                {related.map((p, j) => (
+                  <a href={`/proyek/#${p.id}`} class="service__photo" data-reveal="zoom" style={`--i:${j}`}>
+                    <Image src={p.data.photos[0].src} alt={p.data.photos[0].alt} widths={[320, 480, 640]} sizes="(min-width: 900px) 300px, 50vw" loading="lazy" />
+                    <span>{p.data.title}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  })}
+
+  <CTASection title="Punya proyek yang perlu ditangani?" text="Sampaikan lingkup pekerjaan dan lokasinya. Tim kami akan menindaklanjuti dengan survei lokasi dan penawaran resmi." />
+</BaseLayout>
+
+<style>
+  .service { display: grid; gap: 2rem; align-items: start; }
+  @media (min-width: 900px) { .service { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 4rem; } }
+  .service__icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: var(--navy-900);
+    color: var(--amber-400);
+    margin-bottom: 1.25rem;
+  }
+  .service__icon :global(svg) { width: 28px; height: 28px; }
+  .service__intro .lead { margin-bottom: 1.5rem; }
+  @media (max-width: 479px) { .service__intro .btn { width: 100%; } }
+
+  /* Daftar layanan: 1 kolom di HP, 2 kolom saat ruang cukup */
+  .service__list { container-type: inline-size; }
+  .service__items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  @container (min-width: 600px) { .service__items { grid-template-columns: 1fr 1fr; } }
+  .service__items > li { display: flex; }
+  .service__items a,
+  .service__item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 56px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    color: var(--text);
+    font-weight: 600;
+    line-height: 1.35;
+    text-decoration: none;
+    transition: border-color 0.15s, box-shadow 0.15s, color 0.15s;
+  }
+  .service__items a > span, .service__item > span { flex: 1; }
+  .service__items a:hover { border-color: var(--blue-500); box-shadow: var(--shadow); color: var(--blue-500); }
+  .service__items :global(svg) { flex: none; width: 18px; height: 18px; color: var(--blue-500); }
+  .service__items a :global(svg:last-child) { width: 16px; height: 16px; color: var(--text-muted); }
+
+  /* Galeri proyek terkait: kolom sebanyak jumlah foto, selalu seimbang */
+  .service__projects { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+  .service__projects-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.5rem 1.5rem; margin-bottom: 1.25rem; }
+  .service__projects-head h3 { margin: 0; font-size: var(--fs-lg); }
+  .service__projects-head a { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600; font-size: var(--fs-sm); text-decoration: none; }
+  .service__projects-head :global(svg) { width: 15px; height: 15px; }
+  .service__gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  @media (min-width: 768px) {
+    .service__gallery { grid-template-columns: repeat(var(--n), 1fr); gap: 1rem; }
+    .service__gallery .service__photo { aspect-ratio: var(--ar); }
+  }
+  .service__photo { position: relative; display: block; aspect-ratio: 4 / 3; border-radius: var(--radius); overflow: hidden; color: #fff; text-decoration: none; }
+  .service__photo :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+  .service__photo:hover :global(img) { transform: scale(1.05); }
+  .service__photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgb(7 21 40 / 0.85)); }
+  .service__photo span { position: absolute; left: 0.85rem; right: 0.85rem; bottom: 0.7rem; z-index: 1; font-size: 0.88rem; font-weight: 700; line-height: 1.3; }
+</style>

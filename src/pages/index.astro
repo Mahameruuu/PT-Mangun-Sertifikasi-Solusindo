@@ -1,0 +1,463 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import ProductCard from '../components/ProductCard.astro';
+import CTASection from '../components/CTASection.astro';
+import { site, waLink, waMessages, fullAddress, maps } from '../data/site';
+import { groups, categories } from '../data/categories';
+import { services } from '../data/services';
+
+const products = await getCollection('produk');
+const featured = products
+  .filter((p) => p.data.featured)
+  .sort((a, b) => categories.findIndex((c) => c.slug === a.data.category) - categories.findIndex((c) => c.slug === b.data.category))
+  .slice(0, 8);
+
+const heroIds = ['glory-gfs-220', 'glory-gnh-710', 'compuprint-sp40-plus', 'came-gard-6'];
+const heroProducts = await Promise.all(heroIds.map((id) => getEntry('produk', id)));
+
+const projects = (await getCollection('proyek')).sort((a, b) => a.data.order - b.data.order);
+const projectPreview = ['renovasi-kantin', 'repair-conveyor-line', 'instalasi-sistem-parkir', 'pembuatan-as-hod']
+  .map((id) => projects.find((p) => p.id === id)!)
+  .filter(Boolean);
+const projectLabel: Record<string, string> = {
+  sipil: 'Sipil', mekanikal: 'Mekanikal', elektrikal: 'Elektrikal', pabrikasi: 'Pabrikasi',
+  parkir: 'Sistem Parkir', antrian: 'Sistem Antrian', perbankan: 'Mesin Perbankan',
+};
+
+const reasons = [
+  { icon: 'award', title: `Berpengalaman sejak ${site.since}`, text: 'Berawal dari pengadaan mesin hitung uang Glory dan printer Compuprint di Medan, kini melayani pelanggan di berbagai kota besar di Indonesia.' },
+  { icon: 'headset', title: 'Layanan purna jual', text: 'Menangani perawatan dan perbaikan hampir seluruh mesin hitung uang yang digunakan perbankan dan perusahaan pengelola uang tunai (CIT) di Indonesia.' },
+  { icon: 'software', title: 'Pengembangan perangkat lunak', text: 'Mengembangkan perangkat lunak pendukung bagi perbankan nasional, termasuk aplikasi antrian yang dapat disesuaikan dengan alur layanan.' },
+  { icon: 'map-pinned', title: 'Jaringan layanan di 3 kota', text: 'Kantor pusat di Medan serta titik layanan di Batam dan Pekanbaru untuk penanganan yang lebih cepat.' },
+] as const;
+---
+<BaseLayout title={site.name}>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero__bg" aria-hidden="true"><span class="hero__glow hero__glow--a"></span><span class="hero__glow hero__glow--b"></span></div>
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <span class="eyebrow">Medan · Batam · Pekanbaru</span>
+        <h1>Solusi terpadu peralatan perbankan dan industri, dari pengadaan hingga perawatan.</h1>
+        <p class="hero__lead">
+          Sejak {site.since}, {site.name} mendampingi perbankan, perkantoran, dan industri dengan mesin
+          hitung dan sortir uang, printer, mesin antrian, CCTV, sistem kontrol akses, serta sistem parkir
+          otomatis, didukung layanan purna jual dan jasa teknik yang responsif.
+        </p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href={waLink(waMessages.general)} target="_blank" rel="noopener"><Icon name="whatsapp" /> Diskusikan Kebutuhan Anda</a>
+          <a class="btn btn--ghost-light" href="/produk/">Jelajahi Katalog <Icon name="arrow" /></a>
+        </div>
+        <dl class="hero__stats">
+          <div><dt>Berdiri sejak</dt><dd data-count={site.since} data-from="1990">{site.since}</dd></div>
+          <div><dt>Kategori produk</dt><dd data-count={categories.length}>{categories.length}</dd></div>
+          <div><dt>Kota layanan</dt><dd data-count={1 + site.servicePoints.length}>{1 + site.servicePoints.length}</dd></div>
+        </dl>
+      </div>
+      <div class="hero__visual" aria-hidden="true">
+        {heroProducts.map((p, i) => p && p.data.images[0] && (
+          <div class:list={['hero__tile', `hero__tile--${i}`]} style={`--t:${i}`}>
+            <Image src={p.data.images[0].src} alt="" widths={[220, 340, 440]} sizes="(min-width: 900px) 240px, 40vw" loading={i < 2 ? 'eager' : 'lazy'} />
+            <span>{p.data.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Layanan -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">Layanan Kami</span>
+        <h2>Layanan terpadu, dari pengadaan hingga perawatan</h2>
+        <p>Kami tidak hanya menyediakan perangkat, tetapi juga menangani instalasi, perawatan, hingga pekerjaan teknik langsung di lokasi Anda.</p>
+      </div>
+      <div class="services-grid">
+        {services.map((s, i) => (
+          <div class="service-card" data-reveal={i === 0 ? 'left' : 'right'}>
+            <div class="service-card__head">
+              <span class="service-card__icon"><Icon name={s.icon} /></span>
+              <h3>{s.title}</h3>
+            </div>
+            <p>{s.intro}</p>
+            <ul class="service-card__list">
+              {s.items.map((item) => <li><Icon name="check" />{item.name}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <p class="services-more" data-reveal><a class="btn btn--ghost" href="/layanan/">Pelajari Layanan Kami <Icon name="arrow" /></a></p>
+    </div>
+  </section>
+
+  <!-- Kategori -->
+  <section class="section section--soft">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">Kategori Produk</span>
+        <h2>Peralatan yang menunjang operasional Anda</h2>
+        <p>Telusuri rangkaian produk kami untuk perbankan, perkantoran, dan industri, lengkap dengan spesifikasi teknisnya.</p>
+      </div>
+      <div class="grid grid--4">
+        {groups.map((g, i) => (
+          <div class="card group-card" data-reveal style={`--i:${i}`}>
+            <span class="group-card__icon"><Icon name={g.icon} /></span>
+            <h3>{g.name}</h3>
+            <ul>
+              {categories.filter((c) => c.group === g.id).map((c) => (
+                <li><a href={`/produk/${c.slug}/`}>{c.name}<Icon name="chevron" /></a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Unggulan -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head section-head--row" data-reveal>
+        <div>
+          <span class="eyebrow">Produk Unggulan</span>
+          <h2>Produk pilihan untuk perbankan dan bisnis Anda</h2>
+        </div>
+        <a class="btn btn--ghost" href="/produk/">Jelajahi Semua Produk <Icon name="arrow" /></a>
+      </div>
+      <div class="featured">
+        {featured.map((p, i) => <div class="reveal-wrap" data-reveal style={`--i:${i % 4}`}><ProductCard product={p} compact /></div>)}
+      </div>
+    </div>
+  </section>
+
+  <!-- Mengapa kami -->
+  <section class="section section--soft">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">Mengapa Memilih Kami</span>
+        <h2>Satu mitra untuk pengadaan dan dukungan teknis</h2>
+      </div>
+      <div class="grid grid--4">
+        {reasons.map((r, i) => (
+          <div class="reason" data-reveal style={`--i:${i}`}>
+            <span class="reason__icon"><Icon name={r.icon} /></span>
+            <h3>{r.title}</h3>
+            <p>{r.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Proyek -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head section-head--row" data-reveal>
+        <div>
+          <span class="eyebrow">Portofolio Proyek</span>
+          <h2>Hasil kerja tim kami di lapangan</h2>
+        </div>
+        <a class="btn btn--ghost" href="/proyek/">Lihat Portofolio Lengkap <Icon name="arrow" /></a>
+      </div>
+      <div class="grid grid--4">
+        {projectPreview.map((p, i) => (
+          <a class="project-tile" href={`/proyek/#${p.id}`} data-reveal="zoom" style={`--i:${i}`}>
+            <Image src={p.data.photos[0].src} alt={p.data.photos[0].alt} widths={[300, 450, 600]} sizes="(min-width: 900px) 280px, (min-width: 640px) 45vw, 90vw" loading="lazy" />
+            <span class="project-tile__text">
+              <span class="project-tile__label">{projectLabel[p.data.category]}</span>
+              <span class="project-tile__title">{p.data.title}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Lokasi -->
+  <section class="section section--soft" aria-labelledby="lokasi-title">
+    <div class="container location">
+      <div class="location__info" data-reveal="left">
+        <span class="eyebrow">Lokasi Kami</span>
+        <h2 id="lokasi-title">Kunjungi kantor pusat kami di Medan</h2>
+        <p class="lead">Kunjungi kami untuk konsultasi produk, penawaran harga, maupun kebutuhan servis peralatan. Tim kami siap menyambut Anda.</p>
+        <ul class="location__list">
+          <li><span class="location__icon"><Icon name="pin" /></span><span><strong>Alamat</strong>{fullAddress}</span></li>
+          <li><span class="location__icon"><Icon name="phone" /></span><span><strong>Telepon</strong><a href={`tel:${site.phone.tel}`}>{site.phone.display}</a></span></li>
+          <li><span class="location__icon"><Icon name="map-pinned" /></span><span><strong>Jaringan layanan</strong>{site.servicePoints.map((s) => s.city).join(' dan ')}</span></li>
+        </ul>
+      </div>
+      <div class="location__map" data-reveal="right">
+        <iframe
+          title={`Peta lokasi ${site.name}`}
+          src={maps.embed}
+          loading="lazy"
+          allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <CTASection />
+</BaseLayout>
+
+<script>
+  // Angka statistik di hero menghitung naik saat halaman dibuka.
+  if (document.documentElement.classList.contains('motion')) {
+    document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+      const to = Number(el.dataset.count);
+      const from = Number(el.dataset.from ?? 0);
+      const start = performance.now() + 400;
+      const dur = 1400;
+      const tick = (now: number) => {
+        const t = Math.min(Math.max((now - start) / dur, 0), 1);
+        el.textContent = String(Math.round(from + (to - from) * (1 - Math.pow(1 - t, 3))));
+        if (t < 1) requestAnimationFrame(tick);
+      };
+      el.textContent = String(from);
+      requestAnimationFrame(tick);
+    });
+  }
+</script>
+
+<style>
+  /* Hero */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    background: var(--navy-900);
+    color: #c9d5e8;
+    padding-block: clamp(3rem, 2rem + 5vw, 6rem);
+    overflow: hidden;
+  }
+  /* Latar: pola titik halus + dua cahaya yang bergerak perlahan */
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: linear-gradient(180deg, #000 30%, transparent 100%);
+  }
+  .hero__glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+  }
+  .hero__glow--a {
+    width: 640px; height: 640px;
+    right: -120px; top: -220px;
+    background: rgb(47 111 208 / 0.55);
+    animation: drift-a 16s ease-in-out infinite alternate;
+  }
+  .hero__glow--b {
+    width: 420px; height: 420px;
+    left: -160px; bottom: -220px;
+    background: rgb(245 181 46 / 0.18);
+    animation: drift-b 20s ease-in-out infinite alternate;
+  }
+  @keyframes drift-a { to { transform: translate(-140px, 90px) scale(1.1); } }
+  @keyframes drift-b { to { transform: translate(160px, -60px) scale(1.15); } }
+
+  /* Masuk saat halaman dibuka */
+  :global(.motion) .hero__copy > * { animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  :global(.motion) .hero__copy > :nth-child(2) { animation-delay: 0.08s; }
+  :global(.motion) .hero__copy > :nth-child(3) { animation-delay: 0.16s; }
+  :global(.motion) .hero__copy > :nth-child(4) { animation-delay: 0.24s; }
+  :global(.motion) .hero__copy > :nth-child(5) { animation-delay: 0.32s; }
+  :global(.motion) .hero__tile {
+    animation:
+      pop 0.8s cubic-bezier(0.2, 0.8, 0.2, 1.1) both,
+      float 6s ease-in-out infinite alternate;
+    animation-delay: calc(0.25s + var(--t) * 0.12s), calc(1s + var(--t) * 0.8s);
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(24px); } }
+  @keyframes pop { from { opacity: 0; scale: 0.85; } }
+  @keyframes float { to { translate: 0 -10px; } }
+  .hero__inner { display: grid; gap: 3rem; align-items: center; }
+  @media (min-width: 900px) { .hero__inner { grid-template-columns: 1.1fr 1fr; gap: 2.5rem; } }
+  .hero h1 { color: #fff; max-width: 18ch; }
+  .hero .eyebrow { color: var(--amber-400); }
+  .hero__lead { font-size: var(--fs-lg); max-width: 56ch; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
+  .hero__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem 2.5rem;
+    margin: 2.5rem 0 0;
+    padding-top: 1.75rem;
+    border-top: 1px solid rgb(255 255 255 / 0.12);
+  }
+  .hero__stats dt { font-size: var(--fs-sm); color: #9fb0ca; }
+  .hero__stats dd { margin: 0; font-size: 1.75rem; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+
+  .hero__visual { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .hero__tile {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 1rem 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 20px 40px rgb(0 0 0 / 0.25);
+  }
+  .hero__tile :global(img) { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; }
+  .hero__tile :global(img) { transition: transform 0.4s; }
+  .hero__tile:hover :global(img) { transform: scale(1.06) rotate(-1deg); }
+  .hero__tile span { font-size: 0.8rem; font-weight: 700; color: var(--navy-900); text-align: center; }
+  @media (min-width: 640px) {
+    .hero__tile--1, .hero__tile--3 { transform: translateY(1.5rem); }
+  }
+
+  /* Kategori */
+  .group-card h3 { font-size: 1.1rem; }
+  .group-card__icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    background: #e8f0fc;
+    color: var(--blue-500);
+  }
+  .group-card__icon :global(svg) { width: 22px; height: 22px; }
+  .group-card ul { list-style: none; padding: 0; margin: 0; }
+  .group-card a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--bg-muted);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .group-card li:last-child a { border-bottom: 0; }
+  .group-card a:hover { color: var(--blue-500); }
+  .group-card a :global(svg) { width: 16px; height: 16px; color: var(--text-muted); }
+
+  .section-head--row { max-width: none; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1rem; }
+  .section-head--row h2 { margin: 0; }
+
+  /* Layanan */
+  /* Kartu bertumpuk di HP & tablet, berdampingan mulai 900px */
+  .services-grid { display: grid; gap: 1.25rem; }
+  @media (min-width: 900px) { .services-grid { grid-template-columns: 1fr 1fr; } }
+  .service-card {
+    /* Daftar di dalam kartu menyesuaikan lebar kartunya sendiri (container query). */
+    container-type: inline-size;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: clamp(1.25rem, 0.9rem + 1.4vw, 2rem);
+  }
+  .service-card__head { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 0.85rem; }
+  .service-card__head h3 { margin: 0; }
+  .service-card__icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: #e3ecfb;
+    color: var(--blue-500);
+  }
+  .service-card__icon :global(svg) { width: 26px; height: 26px; }
+  .service-card p { color: var(--text-muted); margin-bottom: 1.25rem; }
+  .service-card__list {
+    list-style: none;
+    margin: 0;
+    padding: 1.25rem 0 0;
+    border-top: 1px solid var(--border);
+    display: grid;
+    align-items: start;
+    gap: 0.65rem 1.5rem;
+  }
+  .service-card__list li { display: flex; align-items: flex-start; gap: 0.6rem; line-height: 1.45; }
+  .service-card__list :global(svg) { width: 18px; height: 18px; flex: none; margin-top: 0.1em; color: var(--blue-500); }
+  @container (min-width: 520px) { .service-card__list { grid-template-columns: 1fr 1fr; } }
+  .services-more { margin: 2rem 0 0; }
+  @media (max-width: 479px) { .services-more .btn { width: 100%; } }
+
+  /* Mengapa */
+  .reason__icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: #e8f0fc;
+    color: var(--blue-500);
+    margin-bottom: 1rem;
+  }
+  .reason__icon :global(svg) { width: 26px; height: 26px; }
+  .reason__icon { transition: background-color 0.25s, color 0.25s, transform 0.25s; }
+  .reason:hover .reason__icon { background: var(--blue-500); color: #fff; transform: translateY(-3px); }
+  .group-card { transition: box-shadow 0.25s, transform 0.25s; }
+  .group-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+  .service-card { transition: box-shadow 0.25s, transform 0.25s; }
+  .service-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+  .reveal-wrap { height: 100%; }
+
+  /* Produk unggulan: 2 kolom di mobile (maks. 6 produk), 4 kolom di desktop */
+  .featured { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  @media (max-width: 639px) { .featured > :nth-child(n + 7) { display: none; } }
+  @media (min-width: 640px) { .featured { gap: 1.25rem; grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 640px) and (max-width: 899px) { .featured > :nth-child(n + 7) { display: none; } }
+  @media (min-width: 900px) { .featured { grid-template-columns: repeat(4, 1fr); } }
+  .reason h3 { font-size: 1.1rem; }
+  .reason p { color: var(--text-muted); margin: 0; }
+
+  /* Proyek */
+  .project-tile {
+    position: relative;
+    display: block;
+    aspect-ratio: 1;
+    border-radius: var(--radius);
+    overflow: hidden;
+    color: #fff;
+    text-decoration: none;
+  }
+  .project-tile :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+  .project-tile:hover :global(img) { transform: scale(1.05); }
+  .project-tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgb(7 21 40 / 0.85)); }
+  .project-tile__text { position: absolute; left: 1rem; right: 1rem; bottom: 1rem; z-index: 1; display: flex; flex-direction: column; gap: 0.3rem; }
+  .project-tile__label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--amber-400); }
+  .project-tile__title { font-weight: 700; line-height: 1.3; }
+
+  /* Lokasi */
+  .location { display: grid; gap: 2rem; align-items: center; }
+  @media (min-width: 900px) { .location { grid-template-columns: 0.9fr 1.1fr; gap: 3.5rem; } }
+  .location__list { list-style: none; padding: 0; margin: 1.75rem 0 0; display: grid; gap: 1.1rem; }
+  .location__list li { display: flex; gap: 0.9rem; align-items: flex-start; }
+  .location__list li > span:last-child { display: flex; flex-direction: column; gap: 0.1rem; }
+  .location__list strong { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+  .location__list a { font-weight: 600; text-decoration: none; }
+  .location__icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #e8f0fc;
+    color: var(--blue-500);
+  }
+  .location__icon :global(svg) { width: 20px; height: 20px; }
+  .location__map {
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    background: var(--bg-muted);
+    aspect-ratio: 4 / 3;
+  }
+  .location__map iframe { width: 100%; height: 100%; border: 0; display: block; }
+</style>

@@ -1,0 +1,63 @@
+---
+// Ikon dari library standar: Lucide (ikon UI) dan Simple Icons (logo merek resmi).
+// SVG di-inline saat build — tidak ada JavaScript atau request tambahan di browser.
+import { icons as lucide } from '@iconify-json/lucide';
+import { icons as simpleIcons } from '@iconify-json/simple-icons';
+import { getIconData, iconToSVG, iconToHTML, replaceIDs } from '@iconify/utils';
+
+const map = {
+  whatsapp: [simpleIcons, 'whatsapp'],
+  facebook: [simpleIcons, 'facebook'],
+  phone: [lucide, 'phone'],
+  mail: [lucide, 'mail'],
+  pin: [lucide, 'map-pin'],
+  arrow: [lucide, 'arrow-right'],
+  'arrow-up': [lucide, 'arrow-up'],
+  menu: [lucide, 'menu'],
+  close: [lucide, 'x'],
+  chevron: [lucide, 'chevron-right'],
+  wrench: [lucide, 'wrench'],
+  bank: [lucide, 'landmark'],
+  building: [lucide, 'building-2'],
+  clock: [lucide, 'history'],
+  code: [lucide, 'code-xml'],
+  map: [lucide, 'map'],
+  play: [lucide, 'play'],
+  zoom: [lucide, 'zoom-in'],
+  smartphone: [lucide, 'smartphone'],
+  'map-pinned': [lucide, 'map-pinned'],
+  award: [lucide, 'award'],
+  headset: [lucide, 'headset'],
+  software: [lucide, 'monitor-cog'],
+  banknote: [lucide, 'banknote'],
+  printer: [lucide, 'printer'],
+  ticket: [lucide, 'ticket'],
+  shield: [lucide, 'shield-check'],
+  'hard-hat': [lucide, 'hard-hat'],
+  check: [lucide, 'circle-check'],
+  images: [lucide, 'images'],
+  user: [lucide, 'user-round'],
+  target: [lucide, 'target'],
+  flag: [lucide, 'flag'],
+  calendar: [lucide, 'calendar-check'],
+  grid: [lucide, 'layout-grid'],
+  handshake: [lucide, 'handshake'],
+} as const;
+
+interface Props { name: keyof typeof map; class?: string }
+const { name, class: className } = Astro.props;
+
+const [set, iconName] = map[name];
+const data = getIconData(set, iconName);
+if (!data) throw new Error(`Ikon tidak ditemukan: ${iconName}`);
+const { attributes, body } = iconToSVG(data);
+const svg = iconToHTML(replaceIDs(body), {
+  ...attributes,
+  width: '1em',
+  height: '1em',
+  'aria-hidden': 'true',
+  focusable: 'false',
+  ...(className && { class: className }),
+});
+---
+<Fragment set:html={svg} />

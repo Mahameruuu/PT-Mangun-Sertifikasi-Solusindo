@@ -1,0 +1,116 @@
+---
+// Lightbox untuk semua tautan bertanda data-lightbox="<grup>" di halaman.
+// Tanpa JavaScript, tautan tetap membuka gambar ukuran penuh.
+import Icon from './Icon.astro';
+---
+<dialog class="lightbox" aria-label="Pratinjau foto">
+  <figure class="lightbox__figure">
+    <figcaption class="lightbox__caption"></figcaption>
+  </figure>
+  <button type="button" class="lightbox__btn lightbox__close" data-action="close" aria-label="Tutup"><Icon name="close" /></button>
+  <button type="button" class="lightbox__btn lightbox__prev" data-action="prev" aria-label="Foto sebelumnya"><Icon name="chevron" /></button>
+  <button type="button" class="lightbox__btn lightbox__next" data-action="next" aria-label="Foto berikutnya"><Icon name="chevron" /></button>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.lightbox')!;
+  // <img> dibuat lewat JS agar tidak ada elemen gambar tanpa src di HTML.
+  const img = document.createElement('img');
+  img.className = 'lightbox__img';
+  img.alt = '';
+  dialog.querySelector('.lightbox__figure')!.prepend(img);
+  const caption = dialog.querySelector<HTMLElement>('.lightbox__caption')!;
+  let items: HTMLAnchorElement[] = [];
+  let index = 0;
+
+  const show = (i: number) => {
+    index = (i + items.length) % items.length;
+    const a = items[index];
+    img.src = a.href;
+    img.alt = a.dataset.caption ?? '';
+    caption.textContent = items.length > 1 ? `${a.dataset.caption ?? ''} (${index + 1}/${items.length})` : a.dataset.caption ?? '';
+    dialog.classList.toggle('is-single', items.length < 2);
+  };
+
+  // a[data-lightbox="grup"]      → buka grup mulai dari foto tersebut.
+  // a[data-lightbox-open="grup"] → buka grup mulai dari foto pertama (mis. tombol "Lihat galeri").
+  // Foto yang disembunyikan (hidden) tetap ikut dalam grup.
+  document.addEventListener('click', (e) => {
+    const a = (e.target as Element).closest<HTMLAnchorElement>('a[data-lightbox], a[data-lightbox-open]');
+    if (!a || e.metaKey || e.ctrlKey) return;
+    e.preventDefault();
+    const group = a.dataset.lightbox ?? a.dataset.lightboxOpen;
+    items = [...document.querySelectorAll<HTMLAnchorElement>(`a[data-lightbox="${group}"]`)];
+    if (!items.length) return;
+    show(a.dataset.lightbox ? items.indexOf(a) : 0);
+    dialog.showModal();
+  });
+
+  // Geser (swipe) di layar sentuh untuk pindah foto.
+  let touchX = 0;
+  dialog.addEventListener('touchstart', (e) => (touchX = e.touches[0].clientX), { passive: true });
+  dialog.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50 && items.length > 1) show(index + (dx < 0 ? 1 : -1));
+  });
+
+  dialog.addEventListener('click', (e) => {
+    const action = (e.target as Element).closest<HTMLElement>('[data-action]')?.dataset.action;
+    if (action === 'close' || e.target === dialog) dialog.close();
+    if (action === 'prev') show(index - 1);
+    if (action === 'next') show(index + 1);
+  });
+  dialog.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') show(index - 1);
+    if (e.key === 'ArrowRight') show(index + 1);
+  });
+  dialog.addEventListener('close', () => img.removeAttribute('src'));
+</script>
+
+<style>
+  .lightbox {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgb(7 21 40 / 0.94);
+    color: #fff;
+  }
+  .lightbox::backdrop { background: rgb(7 21 40 / 0.6); }
+  .lightbox__figure {
+    height: 100%;
+    margin: 0;
+    padding: 4rem 1rem 3.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    pointer-events: none;
+  }
+  .lightbox__img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; pointer-events: auto; }
+  .lightbox__caption { font-size: var(--fs-sm); color: #c9d5e8; text-align: center; }
+  .lightbox__btn {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 0;
+    background: rgb(255 255 255 / 0.12);
+    color: #fff;
+    cursor: pointer;
+  }
+  .lightbox__btn:hover { background: rgb(255 255 255 / 0.25); }
+  .lightbox__btn :global(svg) { width: 24px; height: 24px; }
+  .lightbox__close { top: 1rem; right: 1rem; }
+  .lightbox__prev, .lightbox__next { top: 50%; translate: 0 -50%; }
+  .lightbox__prev { left: 0.75rem; }
+  .lightbox__prev :global(svg) { transform: rotate(180deg); }
+  .lightbox__next { right: 0.75rem; }
+  .lightbox.is-single .lightbox__prev, .lightbox.is-single .lightbox__next { display: none; }
+</style>

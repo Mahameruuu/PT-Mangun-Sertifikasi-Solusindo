@@ -1,0 +1,198 @@
+---
+import { Image, getImage } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Icon from '../../../components/Icon.astro';
+import SpecTable from '../../../components/SpecTable.astro';
+import ProductCard from '../../../components/ProductCard.astro';
+import LiteYouTube from '../../../components/LiteYouTube.astro';
+import Lightbox from '../../../components/Lightbox.astro';
+import CTASection from '../../../components/CTASection.astro';
+import { getCategory } from '../../../data/categories';
+import { site, waLink, waMessages } from '../../../data/site';
+
+export async function getStaticPaths() {
+  const products = await getCollection('produk');
+  return products.map((p) => ({ params: { kategori: p.data.category, slug: p.id }, props: { product: p } }));
+}
+
+const { product } = Astro.props;
+const { name, brand, type, summary, images, features, specs, youtube } = product.data;
+const category = getCategory(product.data.category)!;
+const related = (await getCollection('produk', (p) => p.data.category === product.data.category && p.id !== product.id))
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+const fullImages = await Promise.all(images.map((img) => getImage({ src: img.src, width: 1400 })));
+const message = waMessages.product(name);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name,
+  description: summary,
+  category: category.name,
+  ...(brand && { brand: { '@type': 'Brand', name: brand } }),
+  ...(fullImages[0] && { image: new URL(fullImages[0].src, Astro.site).href }),
+};
+---
+<BaseLayout title={name} description={summary} schema={schema}>
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="crumbs">
+        <li><a href="/">Beranda</a></li>
+        <li><Icon name="chevron" /><a href="/produk/">Produk</a></li>
+        <li><Icon name="chevron" /><a href={`/produk/${category.slug}/`}>{category.name}</a></li>
+        <li><Icon name="chevron" /><span aria-current="page">{name}</span></li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="product">
+    <div class="container product__grid">
+      <div class="product__media">
+        {images.length > 0 ? (
+          <>
+            <a class="product__main" href={fullImages[0].src} data-lightbox="produk" data-caption={images[0].alt}>
+              <Image src={images[0].src} alt={images[0].alt} widths={[400, 600, 800]} sizes="(min-width: 900px) 560px, 92vw" loading="eager" />
+              <span class="product__zoom"><Icon name="zoom" /> Perbesar</span>
+            </a>
+            {images.length > 1 && (
+              <ul class="product__thumbs">
+                {images.slice(1).map((img, i) => (
+                  <li>
+                    <a href={fullImages[i + 1].src} data-lightbox="produk" data-caption={img.alt}>
+                      <Image src={img.src} alt={img.alt} width={200} loading="lazy" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
+        ) : (
+          <div class="product__main product__main--empty">Foto segera tersedia</div>
+        )}
+      </div>
+
+      <div class="product__info">
+        <span class="eyebrow">{type}</span>
+        <h1>{name}</h1>
+        {brand && <p class="product__brand">Merek: <strong>{brand}</strong></p>}
+        <p class="lead">{summary}</p>
+        <div class="product__actions">
+          <a class="btn btn--wa" href={waLink(message)} target="_blank" rel="noopener"><Icon name="whatsapp" /> Dapatkan Penawaran Harga</a>
+          <a class="btn btn--ghost" href={`tel:${site.phone.tel}`}><Icon name="phone" /> Hubungi via Telepon</a>
+        </div>
+        <p class="product__note">Informasi harga dan ketersediaan unit akan kami sampaikan melalui penawaran resmi.</p>
+      </div>
+    </div>
+  </section>
+
+  {(features.length > 0 || specs.length > 0 || youtube) && (
+    <section class="section section--soft details">
+      <div class="container details__inner">
+        {features.length > 0 && (
+          <div>
+            <h2>Fitur utama</h2>
+            <ul class="check-list">{features.map((f) => <li>{f}</li>)}</ul>
+          </div>
+        )}
+        {specs.length > 0 && (
+          <div>
+            <h2>Spesifikasi</h2>
+            {specs.map((t) => <SpecTable table={t} />)}
+          </div>
+        )}
+        {youtube && (
+          <div>
+            <h2>Video</h2>
+            <LiteYouTube id={youtube} title={name} />
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {related.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <h2>Produk lain di {category.name}</h2>
+        <div class="grid grid--3">
+          {related.map((p) => <ProductCard product={p} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CTASection message={message} />
+  <Lightbox />
+</BaseLayout>
+
+<style>
+  .crumbs {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 1.25rem 0 0;
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+  }
+  .crumbs li { display: flex; align-items: center; gap: 0.35rem; }
+  .crumbs a { color: var(--text-muted); text-decoration: none; }
+  .crumbs a:hover { color: var(--blue-500); }
+  .crumbs span { color: var(--text); font-weight: 600; }
+  .crumbs :global(svg) { width: 14px; height: 14px; }
+
+  .product { padding-block: 1.5rem clamp(2.5rem, 2rem + 3vw, 4.5rem); }
+  .product__grid { display: grid; gap: 2rem; }
+  @media (min-width: 900px) { .product__grid { grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; } }
+
+  .product__main {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    padding: 2rem;
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, #f7f9fc, #e9eef6);
+    color: var(--text-muted);
+  }
+  .product__main :global(img) { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+  .product__zoom {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.9);
+    color: var(--navy-900);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .product__zoom :global(svg) { width: 16px; height: 16px; }
+  .product__thumbs { list-style: none; padding: 0; margin: 0.75rem 0 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+  .product__thumbs a {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+  }
+  .product__thumbs a:hover { border-color: var(--blue-500); }
+  .product__thumbs :global(img) { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+
+  .product__info h1 { font-size: clamp(1.9rem, 1.4rem + 2vw, 2.75rem); }
+  .product__brand { color: var(--text-muted); }
+  .product__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+  .product__note { font-size: var(--fs-sm); color: var(--text-muted); margin-top: 1rem; }
+
+  .details__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: 3rem; max-width: 900px; }
+  .details h2 { font-size: var(--fs-xl); margin-bottom: 1.25rem; }
+</style>

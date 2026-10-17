@@ -1,0 +1,351 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import logo from '../assets/img/logo-mss.png';
+import { nav, site, waLink, waMessages, type NavItem } from '../data/site';
+import { groups, categories } from '../data/categories';
+
+const path = Astro.url.pathname;
+const isActive = (item: NavItem) =>
+  item.href === '/' ? path === '/' : (item.match ?? [item.href]).some((p) => path.startsWith(p));
+---
+<header class="header">
+  <div class="container header__inner">
+    <a href="/" class="brand" aria-label={`${site.name} — Beranda`}>
+      <Image src={logo} alt="" height={52} densities={[1, 2]} loading="eager" fetchpriority="high" class="brand__logo" />
+      <span class="brand__name">{site.name}</span>
+    </a>
+
+    <nav class="nav" id="site-nav" aria-label="Navigasi utama">
+      <ul class="nav__list">
+        {nav.map((item, i) => {
+          const active = isActive(item) ? 'page' : undefined;
+          if (!item.mega && !item.children) {
+            return (
+              <li class="nav__item">
+                <a href={item.href} class="nav__link" aria-current={active}>{item.label}</a>
+              </li>
+            );
+          }
+          return (
+            <li class:list={['nav__item dd', { 'dd--mega': item.mega, 'dd--end': i >= nav.length / 2 }]}>
+              <button
+                type="button"
+                class="nav__link dd__toggle"
+                aria-expanded="false"
+                aria-controls={`dd-${i}`}
+                data-active={active ? 'true' : undefined}
+              >
+                {item.label}
+                <Icon name="chevron" class="dd__caret" />
+              </button>
+
+              {item.mega === 'produk' ? (
+                <div class="dd__panel dd__panel--mega" id={`dd-${i}`}>
+                  <div class="mega">
+                    {groups.map((g) => (
+                      <div class="mega__col">
+                        <p class="mega__title">{g.name}</p>
+                        <ul>
+                          {categories.filter((c) => c.group === g.id).map((c) => (
+                            <li>
+                              <a href={`/produk/${c.slug}/`} aria-current={path.startsWith(`/produk/${c.slug}/`) ? 'page' : undefined}>
+                                {c.name}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                  <div class="mega__foot">
+                    <span>Katalog lengkap beserta spesifikasi teknis setiap produk.</span>
+                    <a href="/produk/">Jelajahi semua produk <Icon name="arrow" /></a>
+                  </div>
+                </div>
+              ) : (
+                <div class="dd__panel" id={`dd-${i}`}>
+                  <ul class="dd__list">
+                    {item.children!.map((c) => (
+                      <li>
+                        <a href={c.href} aria-current={path === c.href ? 'page' : undefined}>
+                          <strong>{c.label}</strong>
+                          <span>{c.desc}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      <a class="btn btn--primary nav__cta" href={waLink(waMessages.general)} target="_blank" rel="noopener">
+        <Icon name="whatsapp" /> Konsultasi Sekarang
+      </a>
+    </nav>
+
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Buka menu">
+      <Icon name="menu" class="menu-btn__open" />
+      <Icon name="close" class="menu-btn__close" />
+    </button>
+  </div>
+</header>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('.menu-btn');
+  const navEl = document.getElementById('site-nav');
+  const toggles = [...document.querySelectorAll<HTMLButtonElement>('.dd__toggle')];
+
+  const closeDropdowns = (except?: HTMLButtonElement) =>
+    toggles.forEach((t) => t !== except && t.setAttribute('aria-expanded', 'false'));
+
+  const setMenu = (open: boolean) => {
+    btn?.setAttribute('aria-expanded', String(open));
+    btn?.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
+    navEl?.classList.toggle('is-open', open);
+    document.body.classList.toggle('menu-open', open);
+    if (!open) closeDropdowns();
+  };
+
+  btn?.addEventListener('click', () => setMenu(btn.getAttribute('aria-expanded') !== 'true'));
+
+  toggles.forEach((t) =>
+    t.addEventListener('click', () => {
+      const open = t.getAttribute('aria-expanded') !== 'true';
+      closeDropdowns(t);
+      t.setAttribute('aria-expanded', String(open));
+    }),
+  );
+
+  // Klik di luar menu atau tombol Esc menutup dropdown.
+  document.addEventListener('click', (e) => {
+    if (!(e.target as Element).closest('.dd')) closeDropdowns();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const open = toggles.find((t) => t.getAttribute('aria-expanded') === 'true');
+    if (open) {
+      closeDropdowns();
+      open.focus();
+    } else {
+      setMenu(false);
+    }
+  });
+  // Desktop: fokus keyboard keluar dari dropdown → tutup.
+  // (Tidak di mobile: accordion yang menutup saat mousedown menggeser layout sehingga klik meleset.)
+  const desktop = matchMedia('(min-width: 900px)');
+  document.querySelectorAll<HTMLElement>('.dd').forEach((dd) =>
+    dd.addEventListener('focusout', (e) => {
+      if (desktop.matches && !dd.contains(e.relatedTarget as Node)) {
+        dd.querySelector('.dd__toggle')?.setAttribute('aria-expanded', 'false');
+      }
+    }),
+  );
+  desktop.addEventListener('change', () => setMenu(false));
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgb(255 255 255 / 0.95);
+    backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid var(--border);
+    transition: box-shadow 0.25s, background-color 0.25s;
+  }
+  .header:global(.is-scrolled) { box-shadow: 0 6px 24px rgb(15 27 45 / 0.08); background: rgb(255 255 255 / 0.98); }
+  .header__inner {
+    position: relative;
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  .brand { display: flex; align-items: center; gap: 0.6rem; flex: none; text-decoration: none; }
+  .brand :global(.brand__logo) { height: 44px; width: auto; }
+  .brand__name { max-width: 11.5em; font-size: 0.95rem; font-weight: 800; line-height: 1.2; color: var(--navy-900); }
+  @media (min-width: 1200px) { .brand :global(.brand__logo) { height: 50px; } .brand__name { font-size: 1rem; } }
+
+  .nav__list { list-style: none; margin: 0; padding: 0; }
+  .nav__link {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .nav__link:hover,
+  .nav__link[aria-current='page'],
+  .dd__toggle[data-active],
+  .dd__toggle[aria-expanded='true'] { color: var(--blue-500); }
+
+  .dd__toggle :global(.dd__caret) {
+    width: 16px;
+    height: 16px;
+    transform: rotate(90deg);
+    transition: transform 0.2s;
+  }
+  .dd__toggle[aria-expanded='true'] :global(.dd__caret) { transform: rotate(-90deg); }
+
+  /* Isi dropdown */
+  .dd__list { list-style: none; margin: 0; padding: 0; }
+  .dd__list a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    text-decoration: none;
+  }
+  .dd__list strong { font-weight: 700; color: var(--navy-900); }
+  .dd__list span { font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.4; }
+  .dd__list a:hover, .dd__list a[aria-current='page'] { background: var(--bg-soft); }
+  .dd__list a:hover strong { color: var(--blue-500); }
+
+  .mega__title {
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .mega ul { list-style: none; margin: 0; padding: 0; }
+  .mega a {
+    display: block;
+    padding: 0.4rem 0;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .mega a:hover, .mega a[aria-current='page'] { color: var(--blue-500); }
+  .mega__foot a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .mega__foot :global(svg) { width: 16px; height: 16px; }
+
+  .menu-btn {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--navy-900);
+    cursor: pointer;
+  }
+  .menu-btn :global(svg) { width: 22px; height: 22px; }
+  .menu-btn :global(.menu-btn__close) { display: none; }
+  .menu-btn[aria-expanded="true"] :global(.menu-btn__open) { display: none; }
+  .menu-btn[aria-expanded="true"] :global(.menu-btn__close) { display: block; }
+
+  /* ---------- Mobile & tablet: panel menu + accordion ---------- */
+  @media (max-width: 899px) {
+    .nav {
+      position: fixed;
+      inset: var(--header-h) 0 auto 0;
+      max-height: calc(100dvh - var(--header-h));
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      padding: 0.25rem var(--gutter) 1.5rem;
+      display: none;
+    }
+    .nav.is-open { display: block; }
+    .nav__item { border-bottom: 1px solid var(--bg-muted); }
+    .nav__link { justify-content: space-between; min-height: 52px; font-size: 1.05rem; text-align: left; }
+    .dd__panel { display: none; padding: 0 0 0.75rem; }
+    .dd__toggle[aria-expanded='true'] + .dd__panel { display: block; }
+    .dd__list a { padding-inline: 0.75rem; }
+    .mega { display: grid; gap: 1rem; padding: 0.25rem 0.75rem; }
+    .mega__foot { padding: 0.75rem 0.75rem 0; }
+    .mega__foot span { display: none; }
+    .nav__cta { width: 100%; margin-top: 1.25rem; }
+  }
+
+  /* ---------- Desktop: dropdown melayang ---------- */
+  @media (min-width: 900px) {
+    .menu-btn { display: none; }
+    .nav { display: flex; align-items: center; gap: 1.75rem; height: 100%; }
+    .nav__list { display: flex; gap: 1.6rem; height: 100%; }
+    .nav__item { display: flex; align-items: center; height: 100%; }
+    .dd { position: relative; }
+    .dd--mega { position: static; }
+    /* Dropdown di paruh kanan dibuka rata kanan agar tidak keluar layar. */
+    .dd--end .dd__panel { left: auto; right: -1rem; }
+    .nav__link { font-size: 0.95rem; padding: 0.5rem 0; white-space: nowrap; }
+
+    .dd__panel {
+      position: absolute;
+      top: 100%;
+      left: -1rem;
+      min-width: 300px;
+      padding: 0.5rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(6px);
+      transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+    }
+    .dd__panel--mega {
+      left: var(--gutter);
+      right: var(--gutter);
+      padding: 0;
+      overflow: hidden;
+    }
+    .dd__toggle[aria-expanded='true'] + .dd__panel { opacity: 1; visibility: visible; transform: none; }
+
+    .mega {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      padding: 1.75rem 2rem 1.5rem;
+    }
+    .mega__foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.9rem 2rem;
+      background: var(--bg-soft);
+      border-top: 1px solid var(--border);
+      font-size: var(--fs-sm);
+      color: var(--text-muted);
+    }
+  }
+
+  /* Laptop sempit (mis. DevTools terbuka): rapatkan menu, tombol CTA disembunyikan
+     — tombol WhatsApp melayang tetap tersedia. */
+  @media (min-width: 900px) and (max-width: 1199px) {
+    .nav__list { gap: 1.15rem; }
+    .nav__cta { display: none; }
+  }
+
+  /* Mouse: buka dropdown saat hover. */
+  @media (min-width: 900px) and (hover: hover) {
+    .dd:hover > .dd__panel { opacity: 1; visibility: visible; transform: none; }
+    .dd:hover > .dd__toggle { color: var(--blue-500); }
+    .dd:hover > .dd__toggle :global(.dd__caret) { transform: rotate(-90deg); }
+  }
+</style>

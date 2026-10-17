@@ -1,0 +1,197 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/company-profile/",
+      "destination": "/tentang/",
+      "statusCode": 301
+    },
+    {
+      "source": "/customers/",
+      "destination": "/klien/",
+      "statusCode": 301
+    },
+    {
+      "source": "/carrier/",
+      "destination": "/tentang/",
+      "statusCode": 301
+    },
+    {
+      "source": "/selamat-bergabung-di-web-kami/",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/",
+      "destination": "/produk/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/mesin-hitung-uang-kertas/",
+      "destination": "/produk/mesin-hitung-uang/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/mesin-sortir-uang-kertas/",
+      "destination": "/produk/mesin-sortir-uang/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/mesin-banding-uang/",
+      "destination": "/produk/mesin-banding-uang/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/mesin-antrian/",
+      "destination": "/produk/mesin-antrian/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/assess-control-systems/",
+      "destination": "/produk/access-control/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/cctv/",
+      "destination": "/produk/cctv/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/encoder-machine/",
+      "destination": "/produk/encoder/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/sistem-parkir-otomatis/",
+      "destination": "/produk/sistem-parkir/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/printer/",
+      "destination": "/produk/#g-printer",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/printer/impact-printers/",
+      "destination": "/produk/printer-impact/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/printer/infus-printers/",
+      "destination": "/produk/printer-ink-tank/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/printer/printer-dot-matrix/",
+      "destination": "/produk/printer-dot-matrix/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/printer/thermal-printers/",
+      "destination": "/produk/printer-thermal/",
+      "statusCode": 301
+    },
+    {
+      "source": "/products/printer/transactional-printers/",
+      "destination": "/produk/printer-transaksional/",
+      "statusCode": 301
+    },
+    {
+      "source": "/online-store/",
+      "destination": "/produk/",
+      "statusCode": 301
+    },
+    {
+      "source": "/online-store/mesin-hitung-uang-mesin-sortir-uang-kertas/",
+      "destination": "/produk/#g-perbankan",
+      "statusCode": 301
+    },
+    {
+      "source": "/online-store/cctv-asses-control-sistem-parkir-otomatis/",
+      "destination": "/produk/#g-keamanan",
+      "statusCode": 301
+    },
+    {
+      "source": "/online-store/printers/",
+      "destination": "/produk/#g-printer",
+      "statusCode": 301
+    },
+    {
+      "source": "/online-store/mesin-antrian-digital-banner/",
+      "destination": "/produk/mesin-antrian/",
+      "statusCode": 301
+    },
+    {
+      "source": "/contact-us/",
+      "destination": "/kontak/",
+      "statusCode": 301
+    },
+    {
+      "source": "/contact-us/email-contacts/",
+      "destination": "/kontak/",
+      "statusCode": 301
+    },
+    {
+      "source": "/contact-us/marketing-contacts/",
+      "destination": "/kontak/",
+      "statusCode": 301
+    },
+    {
+      "source": "/contact-us/technical-contacts/",
+      "destination": "/kontak/",
+      "statusCode": 301
+    },
+    {
+      "source": "/galery-foto/",
+      "destination": "/proyek/",
+      "statusCode": 301
+    },
+    {
+      "source": "/galery-foto/sipil-projects/",
+      "destination": "/proyek/#renovasi-kantin",
+      "statusCode": 301
+    },
+    {
+      "source": "/galery-foto/electrical-projects/",
+      "destination": "/proyek/#pemasangan-ac",
+      "statusCode": 301
+    },
+    {
+      "source": "/galery-foto/mechanical-projects/",
+      "destination": "/proyek/#repair-looping-drain-valve",
+      "statusCode": 301
+    },
+    {
+      "source": "/galery-foto/pabrikasi-besi-stainless-baja-ringan/",
+      "destination": "/proyek/#pembuatan-as-hod",
+      "statusCode": 301
+    },
+    {
+      "source": "/galery-foto/instalasi-maintenance-sistem-parkir-otomatis/",
+      "destination": "/proyek/#instalasi-sistem-parkir",
+      "statusCode": 301
+    },
+    {
+      "source": "/galery-foto/instalasi-maintenance-sistem-antrian/",
+      "destination": "/proyek/#instalasi-sistem-antrian",
+      "statusCode": 301
+    },
+    {
+      "source": "/galery-foto/service-mesin-perbankan/",
+      "destination": "/proyek/#service-mesin-perbankan",
+      "statusCode": 301
+    }
+  ],
+  "headers": [
+    {
+      "source": "/_astro/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}

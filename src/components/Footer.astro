@@ -1,0 +1,197 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import logoMark from '../assets/img/logo-mss.png';
+import { site, fullAddress } from '../data/site';
+import { categories } from '../data/categories';
+
+// Tahun saat build sebagai cadangan; diperbarui ke tahun berjalan oleh skrip di bawah.
+const year = new Date().getFullYear();
+const companyLinks = [
+  { href: '/tentang/', label: 'Tentang Kami' },
+  { href: '/layanan/', label: 'Layanan' },
+  { href: '/proyek/', label: 'Portofolio Proyek' },
+  { href: '/klien/', label: 'Klien' },
+  { href: '/kontak/', label: 'Hubungi Kami' },
+];
+---
+<footer class="footer">
+  <div class="container footer__grid">
+    <div class="footer__about">
+      <a href="/" class="footer__brand">
+        <span class="footer__logo"><Image src={logoMark} alt="" height={48} densities={[1, 2]} loading="lazy" /></span>
+        <span>{site.name}</span>
+      </a>
+      <p class="footer__tagline">{site.tagline}</p>
+      <p class="footer__desc">
+        Mitra pengadaan dan layanan peralatan IT untuk perbankan, perkantoran, dan industri, didukung jasa
+        teknik sipil, mekanikal, dan elektrikal. Melayani pelanggan dari Medan sejak {site.since}.
+      </p>
+      <ul class="footer__social" aria-label="Media sosial">
+        <li>
+          <a href={site.facebook} target="_blank" rel="noopener" aria-label={`Facebook ${site.name}`}>
+            <Icon name="facebook" />
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <nav aria-labelledby="footer-produk">
+      <h2 class="footer__title" id="footer-produk">Kategori Produk</h2>
+      <ul class="footer__list">
+        {categories.slice(0, 7).map((c) => <li><a href={`/produk/${c.slug}/`}>{c.name}</a></li>)}
+        <li><a class="footer__more" href="/produk/">Jelajahi semua produk <Icon name="arrow" /></a></li>
+      </ul>
+    </nav>
+
+    <nav aria-labelledby="footer-perusahaan">
+      <h2 class="footer__title" id="footer-perusahaan">Perusahaan</h2>
+      <ul class="footer__list">
+        {companyLinks.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+      </ul>
+    </nav>
+
+    <div class="footer__contact-col">
+      <h2 class="footer__title">Hubungi Kami</h2>
+      <address class="contact">
+        <div class="contact__item">
+          <span class="contact__icon"><Icon name="pin" /></span>
+          <div>
+            <span class="contact__label">Kantor Pusat</span>
+            <span>{fullAddress}</span>
+          </div>
+        </div>
+        <div class="contact__item">
+          <span class="contact__icon"><Icon name="phone" /></span>
+          <div>
+            <span class="contact__label">Telepon</span>
+            <a href={`tel:${site.phone.tel}`}>{site.phone.display}</a>
+          </div>
+        </div>
+        <div class="contact__item">
+          <span class="contact__icon"><Icon name="smartphone" /></span>
+          <div>
+            <span class="contact__label">Seluler</span>
+            {site.mobiles.map((m) => <a href={`tel:${m.tel}`}>{m.display}</a>)}
+          </div>
+        </div>
+        {site.email && (
+          <div class="contact__item">
+            <span class="contact__icon"><Icon name="mail" /></span>
+            <div>
+              <span class="contact__label">Email</span>
+              <a href={`mailto:${site.email}`}>{site.email}</a>
+            </div>
+          </div>
+        )}
+        <div class="contact__item">
+          <span class="contact__icon"><Icon name="map-pinned" /></span>
+          <div>
+            <span class="contact__label">Jaringan Layanan</span>
+            {site.servicePoints.map((s) => (
+              <span class="contact__point">
+                <span><strong>{s.city}</strong> · {s.contact}</span>
+                <a href={`tel:${s.tel}`}>{s.display}</a>
+              </span>
+            ))}
+          </div>
+        </div>
+      </address>
+    </div>
+  </div>
+
+  <div class="footer__bottom">
+    <div class="container footer__bottom-inner">
+      <p>© <span data-current-year>{year}</span> {site.name}. Seluruh hak cipta dilindungi.</p>
+      <p>Seluruh merek dagang yang tercantum merupakan milik pemiliknya masing-masing.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Tahun hak cipta mengikuti tahun berjalan di perangkat pengunjung, tanpa perlu build ulang.
+  const currentYear = String(new Date().getFullYear());
+  document.querySelectorAll('[data-current-year]').forEach((el) => (el.textContent = currentYear));
+</script>
+
+<style>
+  .footer { background: var(--navy-950); color: #aebbd0; font-size: 0.94rem; }
+  .footer a { color: #dfe7f3; text-decoration: none; transition: color 0.15s; }
+  .footer a:hover { color: var(--amber-400); }
+
+  /* Mobile: profil & kontak selebar penuh, dua kolom tautan berdampingan */
+  .footer__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem 1.5rem; padding-block: 4rem 3rem; }
+  .footer__about, .footer__contact-col { grid-column: 1 / -1; }
+  @media (min-width: 900px) {
+    .footer__grid { grid-template-columns: 1.35fr 0.95fr 0.8fr 1.3fr; gap: 2.5rem 3rem; }
+    .footer__about, .footer__contact-col { grid-column: auto; }
+  }
+
+  .footer__brand { display: inline-flex; align-items: center; gap: 0.75rem; font-size: 1.15rem; font-weight: 800; line-height: 1.25; color: #fff !important; }
+  .footer__logo { display: grid; place-items: center; flex: none; width: 58px; height: 58px; border-radius: 50%; background: #fff; }
+  .footer__brand :global(img) { height: 48px; width: auto; }
+  .footer__tagline { margin: 0.75rem 0 0; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.07em; line-height: 1.6; text-transform: uppercase; color: var(--amber-400); max-width: 38ch; }
+  .footer__desc { margin: 0.9rem 0 1.25rem; max-width: 40ch; line-height: 1.7; }
+
+  .footer__social { list-style: none; display: flex; gap: 0.5rem; margin: 0; padding: 0; }
+  .footer__social a {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.08);
+    border: 1px solid rgb(255 255 255 / 0.12);
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .footer__social a:hover { background: var(--amber-400); border-color: var(--amber-400); color: var(--navy-950); }
+  .footer__social :global(svg) { width: 18px; height: 18px; }
+
+  .footer__title {
+    position: relative;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .footer__title::after { content: ''; position: absolute; left: 0; bottom: 0; width: 28px; height: 2px; border-radius: 2px; background: var(--amber-400); }
+
+  .footer__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+  .footer__more { display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.25rem; font-weight: 600; color: var(--amber-400) !important; }
+  .footer__more :global(svg) { width: 15px; height: 15px; transition: transform 0.2s; }
+  .footer__more:hover :global(svg) { transform: translateX(3px); }
+
+  .contact { font-style: normal; display: grid; gap: 1.1rem; }
+  .contact__item { display: flex; gap: 0.85rem; align-items: flex-start; }
+  .contact__item > div { display: flex; flex-direction: column; gap: 0.15rem; line-height: 1.5; }
+  .contact__icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: rgb(245 181 46 / 0.12);
+    color: var(--amber-400);
+  }
+  .contact__icon :global(svg) { width: 17px; height: 17px; }
+  .contact__label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8193ad; }
+  .contact a { white-space: nowrap; }
+  .contact__point { display: flex; flex-direction: column; }
+  .contact__point + .contact__point { margin-top: 0.4rem; }
+  .contact__point strong { color: #dfe7f3; font-weight: 600; }
+
+  .footer__bottom { border-top: 1px solid rgb(255 255 255 / 0.08); }
+  .footer__bottom-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    padding-block: 1.25rem 1.5rem;
+    font-size: 0.82rem;
+    color: #8193ad;
+  }
+  .footer__bottom-inner p { margin: 0; }
+</style>

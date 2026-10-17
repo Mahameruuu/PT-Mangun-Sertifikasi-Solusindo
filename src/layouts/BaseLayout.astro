@@ -1,0 +1,189 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getImage } from 'astro:assets';
+import Icon from '../components/Icon.astro';
+import logo from '../assets/img/logo-mss.png';
+import { site, waLink, waMessages } from '../data/site';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Data terstruktur tambahan (JSON-LD) khusus halaman. */
+  schema?: Record<string, unknown>;
+}
+
+const { title, description = site.description, schema } = Astro.props;
+// Format tab browser: "[logo] Nama Perusahaan" di beranda, "[logo] Nama Perusahaan | Halaman" di halaman lain.
+const fullTitle = title === site.name ? site.name : `${site.name} | ${title}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const logoUrl = new URL((await getImage({ src: logo, format: 'png' })).src, Astro.site).href;
+// Demo di Vercel tidak boleh diindeks. Set PUBLIC_ALLOW_INDEXING=true hanya saat go-live.
+const allowIndexing = import.meta.env.PUBLIC_ALLOW_INDEXING === 'true';
+
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: site.name,
+  slogan: site.tagline,
+  logo: logoUrl,
+  image: logoUrl,
+  description: site.description,
+  url: Astro.site?.href,
+  telephone: site.phone.tel,
+  foundingDate: String(site.since),
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: site.address.street,
+    addressLocality: 'Medan',
+    addressRegion: site.address.province,
+    addressCountry: site.address.country,
+  },
+  sameAs: [site.facebook],
+};
+---
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {!allowIndexing && <meta name="robots" content="noindex, nofollow" />}
+    <!-- ?v=mss memaksa browser mengunduh ulang favicon setelah pergantian logo -->
+    <link rel="icon" href="/favicon.ico?v=mss" sizes="48x48" />
+    <link rel="icon" href="/favicon-32.png?v=mss" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon-16.png?v=mss" type="image/png" sizes="16x16" />
+    <link rel="icon" href="/favicon-192.png?v=mss" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=mss" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#0b1f3a" />
+    <script is:inline>
+      // Dipasang sebelum render agar elemen animasi tidak berkedip.
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+        document.documentElement.classList.add('motion');
+      }
+    </script>
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} />
+    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Lewati ke konten</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+
+    <button type="button" class="to-top" aria-label="Kembali ke atas" hidden>
+      <Icon name="arrow-up" />
+    </button>
+    <a class="wa-float" href={waLink(waMessages.general)} target="_blank" rel="noopener" aria-label="Konsultasi via WhatsApp">
+      <Icon name="whatsapp" />
+    </a>
+  </body>
+</html>
+
+<script>
+  // Elemen [data-reveal] muncul saat masuk layar.
+  if (document.documentElement.classList.contains('motion')) {
+    // Lepas atribut setelah animasi selesai agar elemen kembali ke style normalnya.
+    const settle = (el: Element) => {
+      el.removeAttribute('data-reveal');
+      el.classList.remove('is-visible');
+    };
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          const el = e.target as HTMLElement;
+          io.unobserve(el);
+          // Elemen yang sudah terlewat (mis. reload di tengah halaman) langsung tampil tanpa animasi.
+          if (e.boundingClientRect.bottom <= 0) return settle(el);
+          el.addEventListener('animationend', (ev) => ev.target === el && settle(el), { once: false });
+          el.classList.add('is-visible');
+        }),
+      { threshold: 0 },
+    );
+    document.querySelectorAll('[data-reveal]').forEach((el) => {
+      if (el.getBoundingClientRect().bottom <= 0) settle(el);
+      else io.observe(el);
+    });
+  }
+
+  // Bayangan header saat halaman di-scroll.
+  const header = document.querySelector('.header');
+  // Tombol "kembali ke atas": muncul setelah pengunjung menggulir sekitar satu layar.
+  const toTop = document.querySelector<HTMLButtonElement>('.to-top');
+  if (toTop) toTop.hidden = false;
+  toTop?.addEventListener('click', () => {
+    const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' });
+  });
+
+  const onScroll = () => {
+    header?.classList.toggle('is-scrolled', scrollY > 8);
+    toTop?.classList.toggle('is-visible', scrollY > innerHeight * 0.8);
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>
+
+<style>
+  .wa-float {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--wa);
+    color: #fff;
+    box-shadow: 0 6px 20px rgb(31 168 85 / 0.4);
+    transition: transform 0.15s;
+  }
+  .wa-float:hover { transform: scale(1.06); color: #fff; }
+  .wa-float :global(svg) { width: 28px; height: 28px; }
+  :global(body.menu-open) .wa-float { display: none; }
+
+  /* Tombol kembali ke atas: ditumpuk di atas tombol WhatsApp */
+  .to-top {
+    position: fixed;
+    right: calc(1rem + 6px);
+    bottom: calc(1rem + 56px + 0.75rem);
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--navy-900);
+    box-shadow: var(--shadow-lg);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.25s, visibility 0.25s, transform 0.25s, background-color 0.15s, color 0.15s;
+  }
+  .to-top:global(.is-visible) { opacity: 1; visibility: visible; transform: none; }
+  .to-top:hover { background: var(--navy-900); border-color: var(--navy-900); color: #fff; }
+  .to-top :global(svg) { width: 20px; height: 20px; }
+  :global(body.menu-open) .to-top { display: none; }
+</style>

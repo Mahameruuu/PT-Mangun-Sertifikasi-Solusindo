@@ -1,0 +1,53 @@
+---
+// Embed YouTube ringan: iframe baru dimuat saat pengguna menekan tombol putar.
+import Icon from './Icon.astro';
+interface Props { id: string; title: string }
+const { id, title } = Astro.props;
+---
+<div class="lite-yt" data-id={id} data-title={title}>
+  <img src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" loading="lazy" width="480" height="360" />
+  <button type="button" class="lite-yt__btn" aria-label={`Putar video: ${title}`}>
+    <Icon name="play" />
+  </button>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.lite-yt').forEach((el) => {
+    el.querySelector('button')?.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${el.dataset.id}?autoplay=1&rel=0`;
+      iframe.title = el.dataset.title ?? 'Video';
+      iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      el.replaceChildren(iframe);
+    });
+  });
+</script>
+
+<style>
+  .lite-yt {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #000;
+  }
+  .lite-yt img, .lite-yt :global(iframe) { width: 100%; height: 100%; object-fit: cover; border: 0; }
+  .lite-yt__btn {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 0;
+    background: rgb(11 31 58 / 0.85);
+    color: #fff;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .lite-yt__btn:hover { background: #e62117; transform: scale(1.05); }
+  .lite-yt__btn :global(svg) { width: 30px; height: 30px; fill: currentColor; margin-left: 4px; }
+</style>

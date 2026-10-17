@@ -1,0 +1,67 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import CategoryNav from '../../components/CategoryNav.astro';
+import Icon from '../../components/Icon.astro';
+import CTASection from '../../components/CTASection.astro';
+import { groups, categories } from '../../data/categories';
+
+const products = (await getCollection('produk')).sort((a, b) => a.data.order - b.data.order);
+---
+<BaseLayout
+  title="Produk"
+  description="Katalog mesin hitung & sortir uang Glory, printer Compuprint & Epson, mesin antrian, CCTV, mesin absensi, dan sistem parkir otomatis untuk perbankan, perkantoran, dan industri."
+>
+  <PageHeader
+    title="Katalog Produk"
+    intro="Rangkaian peralatan untuk perbankan, perkantoran, dan industri, lengkap dengan spesifikasi teknis. Hubungi tim kami untuk informasi ketersediaan dan penawaran harga."
+    crumbs={[{ href: '/produk/', label: 'Produk' }]}
+  />
+
+  <div class="container catalog">
+    <CategoryNav />
+    <div>
+      <p class="catalog__meta">Menampilkan {products.length} produk dalam {categories.length} kategori</p>
+      {groups.map((g) => (
+        <section class="group" aria-labelledby={`g-${g.id}`}>
+          <h2 id={`g-${g.id}`} class="group__title">{g.name}</h2>
+          {categories.filter((c) => c.group === g.id).map((c) => {
+            const items = products.filter((p) => p.data.category === c.slug);
+            return (
+              <div class="cat" id={c.slug}>
+                <div class="cat__head">
+                  <div>
+                    <h3><a href={`/produk/${c.slug}/`}>{c.name}</a></h3>
+                    <p>{c.intro}</p>
+                  </div>
+                  <a class="cat__link" href={`/produk/${c.slug}/`}>Lihat kategori <Icon name="arrow" /></a>
+                </div>
+                <div class="catalog__grid">
+                  {items.map((p) => <ProductCard product={p} compact />)}
+                </div>
+              </div>
+            );
+          })}
+        </section>
+      ))}
+    </div>
+  </div>
+
+  <CTASection title="Tidak menemukan produk yang Anda cari?" text="Kami juga melayani pengadaan perangkat lain sesuai kebutuhan perbankan, perkantoran, dan industri. Konsultasikan kebutuhan Anda bersama tim kami." />
+</BaseLayout>
+
+<style>
+  .group + .group { margin-top: 3.5rem; padding-top: 3rem; border-top: 1px solid var(--border); }
+  .group__title { font-size: var(--fs-2xl); margin-bottom: 1.5rem; scroll-margin-top: calc(var(--header-h) + 4.5rem); }
+  .cat { scroll-margin-top: calc(var(--header-h) + 4.5rem); }
+  .cat + .cat { margin-top: 2.75rem; }
+  .cat__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 0.5rem 2rem; margin-bottom: 1.1rem; }
+  .cat__head h3 { margin-bottom: 0.25rem; }
+  .cat__head h3 a { color: inherit; text-decoration: none; }
+  .cat__head h3 a:hover { color: var(--blue-500); }
+  .cat__head p { color: var(--text-muted); margin: 0; max-width: 60ch; }
+  .cat__link { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600; font-size: var(--fs-sm); text-decoration: none; white-space: nowrap; }
+  .cat__link :global(svg) { width: 15px; height: 15px; }
+</style>

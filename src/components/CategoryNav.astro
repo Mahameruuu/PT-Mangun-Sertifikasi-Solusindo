@@ -1,0 +1,152 @@
+---
+// Navigasi kategori katalog: sidebar menempel di desktop, baris chip yang bisa digeser di mobile.
+import { getCollection } from 'astro:content';
+import Icon from './Icon.astro';
+import { groups, categories } from '../data/categories';
+
+interface Props {
+  /** Slug kategori yang sedang dibuka; kosongkan untuk halaman "Semua Produk". */
+  active?: string;
+}
+const { active } = Astro.props;
+
+const products = await getCollection('produk');
+const count = (slug: string) => products.filter((p) => p.data.category === slug).length;
+const current = (slug?: string) => (slug === active ? 'page' : undefined);
+---
+<aside class="catnav" aria-label="Kategori produk">
+  <!-- Mobile & tablet -->
+  <div class="catnav__chips">
+    <a href="/produk/" aria-current={current(undefined)}>Semua Produk</a>
+    {categories.map((c) => <a href={`/produk/${c.slug}/`} aria-current={current(c.slug)}>{c.name}</a>)}
+  </div>
+
+  <!-- Desktop -->
+  <nav class="catnav__panel" aria-label="Kategori produk">
+    <p class="catnav__heading">Kategori Produk</p>
+    <a class="catnav__all" href="/produk/" aria-current={current(undefined)}>
+      <span>Semua Produk</span><span class="catnav__count">{products.length}</span>
+    </a>
+    {groups.map((g) => (
+      <div class="catnav__group">
+        <p class="catnav__group-name"><Icon name={g.icon} /> {g.name}</p>
+        <ul>
+          {categories.filter((c) => c.group === g.id).map((c) => (
+            <li>
+              <a href={`/produk/${c.slug}/`} aria-current={current(c.slug)}>
+                <span>{c.name}</span><span class="catnav__count">{count(c.slug)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </nav>
+</aside>
+
+<script>
+  // Mobile: geser chip aktif ke tengah agar langsung terlihat.
+  const row = document.querySelector<HTMLElement>('.catnav__chips');
+  const chip = row?.querySelector<HTMLElement>('[aria-current="page"]');
+  if (row && chip) row.scrollLeft = chip.offsetLeft - (row.clientWidth - chip.offsetWidth) / 2;
+</script>
+
+<style>
+  /* ---------- Mobile & tablet: chip horizontal, menempel di bawah header ----------
+     Sticky dipasang pada <aside> (induknya area katalog yang tinggi), bukan pada baris chip. */
+  @media (max-width: 899px) {
+    .catnav { position: sticky; top: var(--header-h); z-index: 20; }
+  }
+  .catnav__chips {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0.75rem var(--gutter);
+    background: rgb(255 255 255 / 0.96);
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+  .catnav__chips::-webkit-scrollbar { display: none; }
+  .catnav__chips a {
+    flex: none;
+    padding: 0.45rem 0.95rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    text-decoration: none;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .catnav__chips a[aria-current='page'] { background: var(--navy-900); border-color: var(--navy-900); color: #fff; }
+  .catnav__panel { display: none; }
+
+  /* ---------- Desktop: sidebar ---------- */
+  @media (min-width: 900px) {
+    .catnav__chips { display: none; }
+    .catnav__panel {
+      display: block;
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+      max-height: calc(100vh - var(--header-h) - 3rem);
+      overflow-y: auto;
+      padding: 1.1rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+    .catnav__heading {
+      margin: 0 0 0.75rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--navy-900);
+    }
+    .catnav__group { margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px solid var(--bg-muted); }
+    .catnav__group-name {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0 0 0.2rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .catnav__group-name :global(svg) { width: 16px; height: 16px; color: var(--blue-500); }
+    .catnav__panel ul { list-style: none; margin: 0; padding: 0; }
+    .catnav__panel a {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.36rem 0.6rem;
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.88rem;
+      line-height: 1.35;
+      font-weight: 500;
+      transition: background-color 0.15s, color 0.15s;
+    }
+    .catnav__panel a:hover { background: var(--bg-soft); color: var(--blue-500); }
+    .catnav__panel a[aria-current='page'] { background: var(--navy-900); color: #fff; font-weight: 600; }
+    .catnav__all { font-weight: 700 !important; }
+    .catnav__count {
+      flex: none;
+      min-width: 1.6rem;
+      padding: 0.05rem 0.45rem;
+      border-radius: 999px;
+      background: var(--bg-muted);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .catnav__panel a[aria-current='page'] .catnav__count { background: rgb(255 255 255 / 0.18); color: #fff; }
+  }
+</style>
