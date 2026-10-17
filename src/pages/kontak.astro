@@ -28,13 +28,15 @@ import { categories } from '../data/categories';
             <dd>{fullAddress}</dd>
           </div>
           <div>
-            <dt><Icon name="phone" /> Telepon</dt>
+            <dt><Icon name="phone" /> Telepon / WhatsApp</dt>
             <dd><a href={`tel:${site.phone.tel}`}>{site.phone.display}</a></dd>
           </div>
-          <div>
-            <dt><Icon name="smartphone" /> Seluler</dt>
-            <dd>{site.mobiles.map((m) => <a href={`tel:${m.tel}`}>{m.display}</a>)}</dd>
-          </div>
+          {site.mobiles.length > 0 && (
+            <div>
+              <dt><Icon name="smartphone" /> Seluler</dt>
+              <dd>{site.mobiles.map((m) => <a href={`tel:${m.tel}`}>{m.display}</a>)}</dd>
+            </div>
+          )}
           <div>
             <dt><Icon name="map-pinned" /> Titik layanan</dt>
             <dd>

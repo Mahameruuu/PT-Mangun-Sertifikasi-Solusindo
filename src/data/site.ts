@@ -3,7 +3,7 @@
 // Item bertanda KONFIRMASI belum diverifikasi ke pemilik — jangan diisi dengan tebakan.
 
 export const site = {
-  name: 'PT. Mangun Sertifikasi Solusindo',
+  name: 'PT Mangun Sertifikasi Solusindo',
   // Tagline resmi sesuai logo perusahaan.
   tagline: 'Banking Equipment, Computer, General Supplier, Service & Maintenance',
   description:
@@ -18,13 +18,11 @@ export const site = {
     province: 'Sumatera Utara',
     country: 'ID',
   },
-  phone: { display: '(061) 822-3737', tel: '+62618223737' },
-  mobiles: [
-    { display: '0851-0330-2760', tel: '+6285103302760' },
-    { display: '0813-9792-8106', tel: '+6281397928106' },
-  ],
-  // KONFIRMASI: nomor yang aktif di WhatsApp untuk menerima permintaan penawaran.
-  whatsapp: '6285103302760',
+  // Satu nomor kontak perusahaan untuk telepon & WhatsApp (ditetapkan pemilik, 18 Okt 2026).
+  phone: { display: '0813-9792-8106', tel: '+6281397928106' },
+  // Nomor seluler tambahan (opsional). Kosong = baris "Seluler" tidak ditampilkan.
+  mobiles: [] as { display: string; tel: string }[],
+  whatsapp: '6281397928106',
   // KONFIRMASI: alamat email bisnis (tidak tercantum di situs lama).
   email: null as string | null,
   servicePoints: [

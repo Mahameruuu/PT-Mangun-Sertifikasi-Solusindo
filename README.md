@@ -1,6 +1,6 @@
-# PT. Mangun Sertifikasi Solusindo — Website (pengganti glorystore.online)
+# PT Mangun Sertifikasi Solusindo — Website (pengganti glorystore.online)
 
-Situs statis berbasis [Astro](https://astro.build) untuk katalog produk dan profil perusahaan PT. Mangun Sertifikasi Solusindo.
+Situs statis berbasis [Astro](https://astro.build) untuk katalog produk dan profil perusahaan PT Mangun Sertifikasi Solusindo.
 Konten diambil dari situs WordPress lama (glorystore.online) per 17 Oktober 2026.
 
 ## Menjalankan di lokal

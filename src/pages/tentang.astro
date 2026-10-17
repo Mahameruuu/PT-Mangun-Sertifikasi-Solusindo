@@ -140,7 +140,7 @@ const missions = [
           <ul>
             <li><Icon name="pin" /><span>{fullAddress}</span></li>
             <li><Icon name="phone" /><a href={`tel:${site.phone.tel}`}>{site.phone.display}</a></li>
-            <li><Icon name="smartphone" /><span>{site.mobiles.map((m, i) => <>{i > 0 && ' · '}<a href={`tel:${m.tel}`}>{m.display}</a></>)}</span></li>
+            {site.mobiles.length > 0 && <li><Icon name="smartphone" /><span>{site.mobiles.map((m, i) => <>{i > 0 && ' · '}<a href={`tel:${m.tel}`}>{m.display}</a></>)}</span></li>}
           </ul>
         </article>
         {site.servicePoints.map((s, i) => (
